@@ -1,13 +1,9 @@
-﻿using System;
-using System.Reflection;
-using ASV.Core.Detection;
-using ASV.Core.Detection.Detectors;
-using ASV.Core.Detection.Factory;
-using ASV.Core.Options;
+﻿using ASV.Core.Options;
 using ASV.Core.Tracking;
 using ASV.Core.Versioning;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace ASV.Executable
 {
@@ -29,14 +25,14 @@ namespace ASV.Executable
             ServiceCollection services = new ServiceCollection();
 
             services.AddSingleton(options);
+
+            services.AddChangeDetection();
+
             services.AddScoped<IAssemblyVersioner, AssemblyVersioner>();
 
             services.AddScoped<IChangeTracker, FileSystemChangeTracker>();
 
-            services.AddScoped<IChangeDetectorFactory>(p => new ChangeDetectorFactory(p));
 
-            services.AddScoped<IChangeDetector<Assembly>, AssemblyChangeDetector>();
-            services.AddScoped<IChangeDetector<Type>, TypeChangeDetector>();
 
             return services;
         }

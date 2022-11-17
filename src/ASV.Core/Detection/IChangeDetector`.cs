@@ -2,8 +2,10 @@
 
 namespace ASV.Core.Detection
 {
-    public interface IChangeDetector<in T>: IChangeDetector
+    public interface IChangeDetector<in T>
     {
         ChangeLevel DetectChanges(T current, T original);
+
+        bool Match(T left, T right);
     }
 }

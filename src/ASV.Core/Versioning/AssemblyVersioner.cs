@@ -1,8 +1,8 @@
-﻿using System.Reflection;
-using ASV.Core.Detection;
+﻿using ASV.Core.Detection;
 using ASV.Core.Detection.Factory;
 using ASV.Core.Enums;
 using ASV.Core.Options;
+using System.Reflection;
 
 namespace ASV.Core.Versioning
 {
@@ -29,7 +29,7 @@ namespace ASV.Core.Versioning
 
             if (previousVersion == null)
             {
-                return new Version(1,0,0,1);
+                return new Version(1, 0, 0, 1);
             }
 
             return changeLevel switch

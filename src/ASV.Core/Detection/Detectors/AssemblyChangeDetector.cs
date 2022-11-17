@@ -1,14 +1,13 @@
-﻿using System.Reflection;
-using ASV.Core.Detection.Factory;
+﻿using ASV.Core.Detection.Factory;
 using ASV.Core.Enums;
 using ASV.Core.Tracking;
+using DeltaWare.SDK.Core.Helpers;
+using System.Reflection;
 
 namespace ASV.Core.Detection.Detectors
 {
-    public class AssemblyChangeDetector: IChangeDetector<Assembly>
+    internal sealed class AssemblyChangeDetector : IChangeDetector<Assembly>
     {
-        public Type ForType => typeof(Assembly);
-
         private readonly IChangeDetector<Type> _typeChangeDetector;
 
         private readonly IChangeTracker _changeTracker;
@@ -22,34 +21,34 @@ namespace ASV.Core.Detection.Detectors
         public ChangeLevel DetectChanges(Assembly current, Assembly original)
         {
             ChangeLevel changeLevel = ChangeLevel.None;
-
-            Type[] currentTypes = current.GetLoadedTypes();
-            Type[] previousTypes = original.GetLoadedTypes();
             
-            foreach (Type removedType in previousTypes.Where(c => currentTypes.All(p => p.Name != c.Name)))
-            {
-                _changeTracker.Track($"{removedType.Name} was removed from the Assembly.", ChangeType.Removal, removedType.IsPublic);
+            CollectionHelper.Compare(current.GetLoadedTypes(), original.GetLoadedTypes())
+                .OnCompare((left, right) => _typeChangeDetector.Match(left, right))
+                .ForEachRemoved(removed =>
+                {
+                    _changeTracker.Track($"{removed.Name} was removed from the Assembly.", ChangeType.Removal, removed.IsPublic);
 
-                changeLevel = changeLevel.TryChange(removedType.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
-            }
-            
-            List<Type> existing = currentTypes.Where(c => previousTypes.Any(p => p.Name == c.Name)).ToList();
-            
-            foreach (Type type in existing)
-            {
-                ChangeLevel newLevel = _typeChangeDetector.DetectChanges(type, existing.Single(t => t.Name == type.Name));
+                    changeLevel = changeLevel.TryChange(removed.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
+                })
+                .ForEachExisting((currentExisting, originalExisting) =>
+                {
+                    ChangeLevel newLevel = _typeChangeDetector.DetectChanges(currentExisting, originalExisting);
 
-                changeLevel = changeLevel.TryChange(newLevel);
-            }
+                    changeLevel = changeLevel.TryChange(newLevel);
+                })
+                .ForEachAdded(added =>
+                {
+                    _changeTracker.Track($"{added.Name} was added to the Assembly.", ChangeType.Removal, added.IsPublic);
 
-            foreach (Type removedType in previousTypes.Where(c => previousTypes.All(p => p.Name != c.Name)))
-            {
-                _changeTracker.Track($"{removedType.Name} was added to the Assembly.", ChangeType.Removal, removedType.IsPublic);
+                    changeLevel = changeLevel.TryChange(added.IsPublic ? ChangeLevel.Minor : ChangeLevel.Patch);
+                });
 
-                changeLevel = changeLevel.TryChange(removedType.IsPublic ? ChangeLevel.Minor : ChangeLevel.Patch);
-            }
-            
             return changeLevel;
+        }
+
+        public bool Match(Assembly left, Assembly right)
+        {
+            return left.GetName().Name == right.GetName().Name;
         }
     }
 }
