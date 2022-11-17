@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "AutoVersioning": {
+      "commandName": "Project",
+      "commandLineArgs": "-n \"F:\\Projects\\Experimental\\AutoVersioning\\dll\\Current\\DeltaWare.SDK.Correlation.dll\"\r\n-p \"F:\\Projects\\Experimental\\AutoVersioning\\dll\\Previous\\DeltaWare.SDK.Correlation.dll\""
+    }
+  }
+}
