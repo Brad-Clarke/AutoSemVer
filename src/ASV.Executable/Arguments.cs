@@ -5,16 +5,19 @@ namespace ASV.Executable
 {
     internal class Arguments : IOptions
     {
-        [Option('v', "verbose", Required = false, HelpText = "Set output to verbose messages.")]
+        [Option('v', "verbose", Required = false, HelpText = "Enable writing Change Log to Console.")]
         public bool Verbose { get; set; } = false;
 
-        [Option('o', "output", Required = false, HelpText = "Set the output path for the change log.")]
-        public string? OutputLogFilePath { get; set; } = null;
+        [Option('o', "output", Required = false, HelpText = "Set the output path for the Change Log.")]
+        public string? ChangeLogFilePath { get; set; } = null;
 
-        [Option('n', "new", Required = true, HelpText = "Set the file path for the New DLL")]
-        public string NewDllFilePath { get; set; } = string.Empty;
+        [Option('n', "new", Required = true, HelpText = "Set the directory for the new build")]
+        public string NewBuildDirectory { get; set; } = string.Empty;
 
-        [Option('p', "previous", Required = true, HelpText = "Set the file path for the Previous DLL")]
-        public string PreviousDllFilePath { get; set; } = string.Empty;
+        [Option('p', "previous", Required = true, HelpText = "Set the directory for the previous build")]
+        public string PreviousBuildDirectory { get; set; } = string.Empty;
+
+        [Option('f', "file", Required = true, HelpText = "Set the dll filename")]
+        public string DllFileName { get; set; } = string.Empty;
     }
 }

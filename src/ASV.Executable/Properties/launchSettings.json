@@ -2,7 +2,7 @@
   "profiles": {
     "AutoVersioning": {
       "commandName": "Project",
-      "commandLineArgs": "-n \"F:\\Projects\\Experimental\\AutoVersioning\\dll\\Current\\DeltaWare.SDK.Correlation.dll\"\r\n-p \"F:\\Projects\\Experimental\\AutoVersioning\\dll\\Previous\\DeltaWare.SDK.Correlation.dll\""
+      "commandLineArgs": "-p \"D:\\#data\\AutoSemVer\\Finance\\Old\"\r\n-n \"D:\\#data\\AutoSemVer\\Finance\\New\"\r\n-f \"Finance.Domain.dll\"\r\n-o \"D:\\#data\\AutoSemVer\\changes.txt\"\r\n-v"
     }
   }
 }

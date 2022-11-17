@@ -1,8 +1,9 @@
-﻿using System.Reflection;
-using ASV.Core.Detection.Factory;
+﻿using ASV.Core.Detection.Factory;
 using ASV.Core.Enums;
+using ASV.Core.Extensions;
 using ASV.Core.Tracking;
 using DeltaWare.SDK.Core.Helpers;
+using System.Reflection;
 
 namespace ASV.Core.Detection.Detectors
 {
@@ -20,8 +21,6 @@ namespace ASV.Core.Detection.Detectors
 
         private readonly IChangeDetector<MethodInfo> _methodChangeDetector;
 
-        private readonly IChangeDetector<Attribute> _attributeChangeDetector;
-
 
         public TypeChangeDetector(IChangeTracker changeTracker, IChangeDetectorFactory changeDetectorFactory)
         {
@@ -32,7 +31,6 @@ namespace ASV.Core.Detection.Detectors
             _fieldChangeDetector = changeDetectorFactory.Build<FieldInfo>();
             _eventChangeDetector = changeDetectorFactory.Build<EventInfo>();
             _methodChangeDetector = changeDetectorFactory.Build<MethodInfo>();
-            _attributeChangeDetector = changeDetectorFactory.Build<Attribute>();
         }
 
         public ChangeLevel DetectChanges(Type current, Type original)
@@ -57,13 +55,18 @@ namespace ASV.Core.Detection.Detectors
 
         private ChangeLevel CompareMethods(Type current, Type original)
         {
+            string name = current.Name;
+
             ChangeLevel changeLevel = ChangeLevel.None;
 
-            CollectionHelper.Compare(current.GetMethods(), original.GetMethods())
+            var tempA = current.GetMethods().Where(m => !m.IsSpecialName).ToArray();
+            var tempB = original.GetMethods().Where(m => !m.IsSpecialName).ToArray();
+
+            CollectionHelper.Compare(current.GetMethods().Where(m => !m.IsSpecialName).ToArray(), original.GetMethods().Where(m => !m.IsSpecialName).ToArray())
                 .OnCompare((left, right) => _methodChangeDetector.Match(left, right))
                 .ForEachRemoved(removed =>
                 {
-                    _changeTracker.Track($"Method {removed.Name} was removed from {original.Name}", ChangeType.Removal, removed.IsPublic);
+                    _changeTracker.Track($"Method [{original.GetFriendlyName()}].{removed.GetFriendlyName()} was Removed.", ChangeType.Removal);
 
                     changeLevel = changeLevel.TryChange(removed.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
                 })
@@ -75,23 +78,23 @@ namespace ASV.Core.Detection.Detectors
                 })
                 .ForEachAdded(added =>
                 {
-                    _changeTracker.Track($"Method {added.Name} was added to {current.Name}", ChangeType.Removal, added.IsPublic);
+                    _changeTracker.Track($"Method [{original.GetFriendlyName()}].{added.GetFriendlyName()} was Added.", ChangeType.Addition);
 
                     changeLevel = changeLevel.TryChange(added.IsPublic ? ChangeLevel.Minor : ChangeLevel.Patch);
                 });
 
             return changeLevel;
         }
-        
+
         private ChangeLevel CompareConstructors(Type current, Type original)
         {
             ChangeLevel changeLevel = ChangeLevel.None;
 
-            CollectionHelper.Compare(current.GetConstructors(), original.GetConstructors())
+            CollectionHelper.Compare(current.GetConstructors().Where(m => !m.IsSpecialName).ToArray(), original.GetConstructors().Where(m => !m.IsSpecialName).ToArray())
                 .OnCompare((left, right) => _constructorChangeDetector.Match(left, right))
                 .ForEachRemoved(removed =>
                 {
-                    _changeTracker.Track($"Constructor was removed from {original.Name}", ChangeType.Removal, removed.IsPublic);
+                    _changeTracker.Track($"Constructor {removed.GetFriendlyName()} was Removed from Type [{original.GetFriendlyName()}]", ChangeType.Removal);
 
                     changeLevel = changeLevel.TryChange(removed.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
                 })
@@ -103,8 +106,7 @@ namespace ASV.Core.Detection.Detectors
                 })
                 .ForEachAdded(added =>
                 {
-                    _changeTracker.Track($"Constructor was added to {current.Name}", ChangeType.Removal,
-                        added.IsPublic);
+                    _changeTracker.Track($"Constructor {added.GetFriendlyName()} was Added to Type [{original.GetFriendlyName()}]", ChangeType.Addition);
 
                     changeLevel = changeLevel.TryChange(added.IsPublic ? ChangeLevel.Minor : ChangeLevel.Patch);
                 });
@@ -120,9 +122,9 @@ namespace ASV.Core.Detection.Detectors
                 .OnCompare((left, right) => _propertyChangeDetector.Match(left, right))
                 .ForEachRemoved(removed =>
                 {
-                    _changeTracker.Track($"Property {removed.Name} was removed from {original.Name}", ChangeType.Removal, original.IsPublic);
+                    _changeTracker.Track($"Property [{original.GetFriendlyName()}.{removed.Name}] was Removed.", ChangeType.Removal);
 
-                    changeLevel = changeLevel.TryChange(original.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
+                    changeLevel = changeLevel.TryChange(removed.IsPublic() ? ChangeLevel.Major : ChangeLevel.Patch);
                 })
                 .ForEachExisting((currentExisting, originalExisting) =>
                 {
@@ -132,9 +134,9 @@ namespace ASV.Core.Detection.Detectors
                 })
                 .ForEachAdded(added =>
                 {
-                    _changeTracker.Track($"Property {added.Name} was added to {current.Name}", ChangeType.Removal, current.IsPublic);
+                    _changeTracker.Track($"Property [{original.GetFriendlyName()}.{added.Name}] was Added.", ChangeType.Addition);
 
-                    changeLevel = changeLevel.TryChange(original.IsPublic ? ChangeLevel.Minor : ChangeLevel.Patch);
+                    changeLevel = changeLevel.TryChange(added.IsPublic() ? ChangeLevel.Minor : ChangeLevel.Patch);
                 });
 
             return changeLevel;
@@ -148,9 +150,9 @@ namespace ASV.Core.Detection.Detectors
                 .OnCompare((left, right) => _fieldChangeDetector.Match(left, right))
                 .ForEachRemoved(removed =>
                 {
-                    _changeTracker.Track($"Field {removed.Name} was removed from {original.Name}", ChangeType.Removal, removed.IsPublic);
+                    _changeTracker.Track($"Field [{original.GetFriendlyName()}.{removed.Name}] was Removed.", ChangeType.Removal);
 
-                    changeLevel = changeLevel.TryChange(original.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
+                    changeLevel = changeLevel.TryChange(removed.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
                 })
                 .ForEachExisting((currentExisting, originalExisting) =>
                 {
@@ -160,10 +162,9 @@ namespace ASV.Core.Detection.Detectors
                 })
                 .ForEachAdded(added =>
                 {
-                    _changeTracker.Track($"Field {added.Name} was added to {current.Name}", ChangeType.Removal,
-                        current.IsPublic);
+                    _changeTracker.Track($"Field [{original.GetFriendlyName()}.{added.Name}] was Added.", ChangeType.Addition);
 
-                    changeLevel = changeLevel.TryChange(original.IsPublic ? ChangeLevel.Minor : ChangeLevel.Patch);
+                    changeLevel = changeLevel.TryChange(added.IsPublic ? ChangeLevel.Minor : ChangeLevel.Patch);
                 });
 
             return changeLevel;
@@ -177,9 +178,9 @@ namespace ASV.Core.Detection.Detectors
                 .OnCompare((left, right) => _eventChangeDetector.Match(left, right))
                 .ForEachRemoved(removed =>
                 {
-                    _changeTracker.Track($"Event {removed.Name} was removed from {original.Name}", ChangeType.Removal, original.IsPublic);
+                    _changeTracker.Track($"Event [{original.GetFriendlyName()}.{removed.Name}] was Removed.", ChangeType.Removal);
 
-                    changeLevel = changeLevel.TryChange(original.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
+                    changeLevel = changeLevel.TryChange(removed.IsPublic() ? ChangeLevel.Major : ChangeLevel.Patch);
                 })
                 .ForEachExisting((currentExisting, originalExisting) =>
                 {
@@ -189,10 +190,9 @@ namespace ASV.Core.Detection.Detectors
                 })
                 .ForEachAdded(added =>
                 {
-                    _changeTracker.Track($"Event {added.Name} was added to {current.Name}", ChangeType.Removal,
-                        current.IsPublic);
+                    _changeTracker.Track($"Event [{original.GetFriendlyName()}.{added.Name}] was Added.", ChangeType.Addition);
 
-                    changeLevel = changeLevel.TryChange(original.IsPublic ? ChangeLevel.Minor : ChangeLevel.Patch);
+                    changeLevel = changeLevel.TryChange(added.IsPublic() ? ChangeLevel.Minor : ChangeLevel.Patch);
                 });
 
             return changeLevel;
@@ -201,25 +201,18 @@ namespace ASV.Core.Detection.Detectors
         private ChangeLevel CompareAttributes(Type current, Type original)
         {
             ChangeLevel changeLevel = ChangeLevel.None;
-            
+
             CollectionHelper.Compare(current.GetCustomAttributes().ToArray(), original.GetCustomAttributes().ToArray())
-                .OnCompare((left, right) => _attributeChangeDetector.Match(left, right))
+                .OnCompare((left, right) => left.GetType().GetFriendlyName() == right.GetType().GetFriendlyName())
                 .ForEachRemoved(removed =>
                 {
-                    _changeTracker.Track($"Event {removed.GetType().Name} was removed from {original.Name}", ChangeType.Removal, original.IsPublic);
+                    _changeTracker.Track($"Attribute [{original.GetFriendlyName()}.{removed.GetType().GetFriendlyName()}] was Removed.", ChangeType.Removal);
 
                     changeLevel = changeLevel.TryChange(original.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
                 })
-                .ForEachExisting((currentExisting, originalExisting) =>
-                {
-                    ChangeLevel newLevel = _attributeChangeDetector.DetectChanges(currentExisting, originalExisting);
-
-                    changeLevel = changeLevel.TryChange(newLevel);
-                })
                 .ForEachAdded(added =>
                 {
-                    _changeTracker.Track($"Event {added.GetType().Name} was added to {current.Name}", ChangeType.Removal,
-                        current.IsPublic);
+                    _changeTracker.Track($"Attribute [{original.GetFriendlyName()}.{added.GetType().GetFriendlyName()}] was Added.", ChangeType.Addition);
 
                     changeLevel = changeLevel.TryChange(original.IsPublic ? ChangeLevel.Minor : ChangeLevel.Patch);
                 });

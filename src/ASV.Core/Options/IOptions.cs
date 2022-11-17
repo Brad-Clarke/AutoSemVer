@@ -3,8 +3,10 @@
     public interface IOptions
     {
         public bool Verbose { get; }
-        public string? OutputLogFilePath { get; }
-        public string NewDllFilePath { get; }
-        public string PreviousDllFilePath { get; }
+        public string? ChangeLogFilePath { get; }
+        public string NewBuildDirectory { get; }
+        public string PreviousBuildDirectory { get; }
+
+        public string DllFileName { get; }
     }
 }

@@ -14,9 +14,16 @@ namespace ASV.Core.Tracking
             _options = options;
         }
 
-        public void Track(string description, ChangeType changeType, bool isVisible)
+        public void Track(string description, ChangeType changeType)
         {
-            _trackedChanges.Add(new TrackedChange(description, changeType, isVisible));
+            if (_options.Verbose)
+            {
+                string changeString = changeType.ToString().ToUpper().PadRight(8, ' ');
+
+                Console.WriteLine($"{changeString} | {description}");
+            }
+
+            _trackedChanges.Add(new TrackedChange(description, changeType));
         }
 
         private class TrackedChange
@@ -25,13 +32,10 @@ namespace ASV.Core.Tracking
 
             public ChangeType ChangeType { get; }
 
-            public bool IsVisible { get; }
-
-            public TrackedChange(string description, ChangeType changeType, bool isVisible)
+            public TrackedChange(string description, ChangeType changeType)
             {
                 Description = description;
                 ChangeType = changeType;
-                IsVisible = isVisible;
             }
 
             public override string ToString()
@@ -42,6 +46,22 @@ namespace ASV.Core.Tracking
 
         public void Dispose()
         {
+            if (string.IsNullOrWhiteSpace(_options.ChangeLogFilePath))
+            {
+                return;
+            }
+
+            if (File.Exists(_options.ChangeLogFilePath))
+            {
+                File.Delete(_options.ChangeLogFilePath);
+            }
+
+            if (!_trackedChanges.Any())
+            {
+                return;
+            }
+
+            File.WriteAllLines(_options.ChangeLogFilePath, _trackedChanges.Select(s => s.ToString()));
         }
     }
 }

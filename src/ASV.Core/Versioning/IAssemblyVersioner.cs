@@ -2,6 +2,8 @@
 {
     public interface IAssemblyVersioner
     {
-        public Version GetVersion();
+        public Version GetNewVersion();
+
+        public Version? GetCurrentVersion();
     }
 }
