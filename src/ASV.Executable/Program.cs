@@ -7,6 +7,7 @@ using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
+using System.Reflection;
 
 namespace ASV.Executable
 {
@@ -20,13 +21,20 @@ namespace ASV.Executable
             {
                 return;
             }
+            
+            Arguments arguments = parserResult.Value;
+            
+            Assembly currentAssembly = LoadAssembly(arguments, AssemblyType.Current);
+            Assembly previousAssembly = LoadAssembly(arguments, AssemblyType.Previous);
 
-            IOptions options = parserResult.Value;
+            using ServiceProvider serviceProvider = BuildServices(arguments).BuildServiceProvider();
 
-            using ServiceProvider serviceProvider = BuildServices(options).BuildServiceProvider();
+            Console.WriteLine("----------------------------------------------------------------------------------------------------");
+            Console.WriteLine($"Checking for semantic changes in {currentAssembly.GetName().Name}\r\n");
+            Console.WriteLine("----------------------------------------------------------------------------------------------------");
 
-            Version? previousVersion = serviceProvider.GetRequiredService<IAssemblyVersioner>().GetCurrentVersion();
-            Version version = serviceProvider.GetRequiredService<IAssemblyVersioner>().GetNewVersion();
+            Version? previousVersion = null;
+            Version version = serviceProvider.GetRequiredService<IAssemblyVersioner>().GetNewVersion(currentAssembly, previousAssembly);
 
             Console.WriteLine($"Previous Version:[{previousVersion}]");
             Console.Write($"Generated Version:[{version}]");
@@ -40,13 +48,33 @@ namespace ASV.Executable
 
             services.AddChangeDetection();
 
-            services.AddSingleton<AssemblyLoader>();
+            services.AddSingleton<FileSystemAssemblyLoader>();
             services.AddScoped<IAssemblyVersioner, AssemblyVersioner>();
 
             services.AddScoped<IChangeTracker, FileSystemChangeTracker>();
 
 
             return services;
+        }
+
+        private static Assembly LoadAssembly(Arguments arguments, AssemblyType type)
+        {
+            string directory = type switch
+            {
+                AssemblyType.Current => arguments.CurrentBuildDirectory,
+                AssemblyType.Previous => arguments.PreviousBuildDirectory,
+                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            };
+
+            IAssemblyLoader assemblyLoader = new FileSystemAssemblyLoader(directory, arguments.PackageName);
+
+            return assemblyLoader.LoadAssembly();
+        }
+
+        private enum AssemblyType
+        {
+            Current,
+            Previous
         }
     }
 }

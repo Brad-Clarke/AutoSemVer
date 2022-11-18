@@ -19,11 +19,11 @@ namespace ASV.Core.Detection.Detectors
             _changeTracker = changeTracker;
         }
 
-        public ChangeLevel DetectChanges(Assembly current, Assembly original)
+        public ChangeLevel DetectChanges(Assembly current, Assembly previous)
         {
             ChangeLevel changeLevel = ChangeLevel.None;
 
-            CollectionHelper.Compare(current.GetLoadedTypes().Where(t => !t.IsSystemGenerated()).ToArray(), original.GetLoadedTypes().Where(t => !t.IsSystemGenerated()).ToArray())
+            CollectionHelper.Compare(current.GetLoadedTypes().Where(t => !t.IsSystemGenerated()).ToArray(), previous.GetLoadedTypes().Where(t => !t.IsSystemGenerated()).ToArray())
                 .OnCompare((left, right) => _typeChangeDetector.Match(left, right))
                 .ForEachRemoved(removed =>
                 {

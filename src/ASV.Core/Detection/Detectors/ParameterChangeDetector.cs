@@ -15,18 +15,18 @@ namespace ASV.Core.Detection.Detectors
             _changeTracker = changeTracker;
         }
 
-        public ChangeLevel DetectChanges(ParameterInfo current, ParameterInfo original)
+        public ChangeLevel DetectChanges(ParameterInfo current, ParameterInfo previous)
         {
             ChangeLevel changeLevel = ChangeLevel.None;
 
-            if (current.ParameterType.GetFriendlyName() != original.ParameterType.GetFriendlyName())
+            if (current.ParameterType.GetFriendlyName() != previous.ParameterType.GetFriendlyName())
             {
-                _changeTracker.Track($"Parameter [{current.Member?.Name ?? "unknown"}.{original.Name}] Type has been changed from [{original.ParameterType.GetFriendlyName()}] to [{current.ParameterType.GetFriendlyName()}].", ChangeType.Change);
+                _changeTracker.Track($"Parameter [{current.Member?.Name ?? "unknown"}.{previous.Name}] Type has been changed from [{previous.ParameterType.GetFriendlyName()}] to [{current.ParameterType.GetFriendlyName()}].", ChangeType.Change);
 
-                changeLevel = changeLevel.TryChange(original.Member.IsPublic() ? ChangeLevel.Major : ChangeLevel.Patch);
+                changeLevel = changeLevel.TryChange(previous.Member.IsPublic() ? ChangeLevel.Major : ChangeLevel.Patch);
             }
 
-            changeLevel = changeLevel.TryChange(CompareAttributes(current, original));
+            changeLevel = changeLevel.TryChange(CompareAttributes(current, previous));
 
             return changeLevel;
         }

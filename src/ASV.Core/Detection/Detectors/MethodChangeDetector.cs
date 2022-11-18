@@ -20,33 +20,33 @@ namespace ASV.Core.Detection.Detectors
             _parameterChangeDetector = changeDetectorFactory.Build<ParameterInfo>();
         }
 
-        public ChangeLevel DetectChanges(MethodInfo current, MethodInfo original)
+        public ChangeLevel DetectChanges(MethodInfo current, MethodInfo previous)
         {
             ChangeLevel changeLevel = ChangeLevel.None;
 
-            if (current.ReturnType.GetFriendlyName() != original.ReturnType.GetFriendlyName())
+            if (current.ReturnType.GetFriendlyName() != previous.ReturnType.GetFriendlyName())
             {
-                _changeTracker.Track($"Method [{current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{original.Name}] Type has been changed from [{original.ReturnType.GetFriendlyName()}] to [{current.ReturnType.GetFriendlyName()}].", ChangeType.Change);
+                _changeTracker.Track($"Method [{current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{previous.Name}] Type has been changed from [{previous.ReturnType.GetFriendlyName()}] to [{current.ReturnType.GetFriendlyName()}].", ChangeType.Change);
 
-                changeLevel = changeLevel.TryChange(original.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
+                changeLevel = changeLevel.TryChange(previous.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
             }
 
-            if (current.IsPublic != original.IsPublic)
+            if (current.IsPublic != previous.IsPublic)
             {
-                if (original.IsPublic)
+                if (previous.IsPublic)
                 {
-                    _changeTracker.Track($"Method [{current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{original.Name}] is no longer publicly visible.", ChangeType.Removal);
+                    _changeTracker.Track($"Method [{current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{previous.Name}] is no longer publicly visible.", ChangeType.Removal);
                 }
                 else
                 {
-                    _changeTracker.Track($"Method [{current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{original.Name}] is now publicly visible.", ChangeType.Addition);
+                    _changeTracker.Track($"Method [{current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{previous.Name}] is now publicly visible.", ChangeType.Addition);
                 }
 
-                changeLevel = changeLevel.TryChange(original.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
+                changeLevel = changeLevel.TryChange(previous.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
             }
 
-            changeLevel = changeLevel.TryChange(CompareAttributes(current, original));
-            changeLevel = changeLevel.TryChange(CompareParameters(current, original));
+            changeLevel = changeLevel.TryChange(CompareAttributes(current, previous));
+            changeLevel = changeLevel.TryChange(CompareParameters(current, previous));
 
             return changeLevel;
         }

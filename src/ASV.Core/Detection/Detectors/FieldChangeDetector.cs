@@ -15,32 +15,32 @@ namespace ASV.Core.Detection.Detectors
             _changeTracker = changeTracker;
         }
 
-        public ChangeLevel DetectChanges(FieldInfo current, FieldInfo original)
+        public ChangeLevel DetectChanges(FieldInfo current, FieldInfo previous)
         {
             ChangeLevel changeLevel = ChangeLevel.None;
 
-            if (current.FieldType.GetFriendlyName() != original.FieldType.GetFriendlyName())
+            if (current.FieldType.GetFriendlyName() != previous.FieldType.GetFriendlyName())
             {
-                _changeTracker.Track($"Field [{current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{original.Name}] Type has been changed from [{original.FieldType.GetFriendlyName()}] to [{current.FieldType.GetFriendlyName()}].", ChangeType.Change);
+                _changeTracker.Track($"Field [{current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{previous.Name}] Type has been changed from [{previous.FieldType.GetFriendlyName()}] to [{current.FieldType.GetFriendlyName()}].", ChangeType.Change);
 
-                changeLevel = changeLevel.TryChange(original.IsPublic() ? ChangeLevel.Major : ChangeLevel.Patch);
+                changeLevel = changeLevel.TryChange(previous.IsPublic() ? ChangeLevel.Major : ChangeLevel.Patch);
             }
 
-            if (current.IsPublic() != original.IsPublic())
+            if (current.IsPublic() != previous.IsPublic())
             {
-                if (original.IsPublic())
+                if (previous.IsPublic())
                 {
-                    _changeTracker.Track($"Field [{current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{original.Name}] is no longer publicly visible.", ChangeType.Removal);
+                    _changeTracker.Track($"Field [{current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{previous.Name}] is no longer publicly visible.", ChangeType.Removal);
                 }
                 else
                 {
-                    _changeTracker.Track($"Field [{current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{original.Name}] is now publicly visible.", ChangeType.Addition);
+                    _changeTracker.Track($"Field [{current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{previous.Name}] is now publicly visible.", ChangeType.Addition);
                 }
 
-                changeLevel = changeLevel.TryChange(original.IsPublic() ? ChangeLevel.Major : ChangeLevel.Patch);
+                changeLevel = changeLevel.TryChange(previous.IsPublic() ? ChangeLevel.Major : ChangeLevel.Patch);
             }
 
-            changeLevel = changeLevel.TryChange(CompareAttributes(current, original));
+            changeLevel = changeLevel.TryChange(CompareAttributes(current, previous));
 
             return changeLevel;
         }

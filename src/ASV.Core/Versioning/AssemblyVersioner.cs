@@ -3,34 +3,24 @@ using ASV.Core.Detection.Factory;
 using ASV.Core.Enums;
 using ASV.Core.Options;
 using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace ASV.Core.Versioning
 {
     public class AssemblyVersioner : IAssemblyVersioner
     {
         private readonly IOptions _options;
-        private readonly AssemblyLoader _assemblyLoader;
         private readonly IChangeDetector<Assembly> _assemblyChangeDetector;
 
-        public AssemblyVersioner(IOptions options, IChangeDetectorFactory changeDetectorFactory, AssemblyLoader assemblyLoader)
+        public AssemblyVersioner(IOptions options, IChangeDetectorFactory changeDetectorFactory)
         {
             _options = options;
-            _assemblyLoader = assemblyLoader;
             _assemblyChangeDetector = changeDetectorFactory.Build<Assembly>();
 
         }
 
-        public Version GetNewVersion()
+        public Version GetNewVersion(Assembly current, Assembly previous)
         {
-            if (_options.Verbose)
-            {
-                Console.WriteLine("----------------------------------------------------------------------------------------------------");
-                Console.WriteLine($"Checking for semantic changes in {_assemblyLoader.NewAssembly.GetName().Name}\r\n");
-                Console.WriteLine($"New Assembly DLL Path \"{_options.NewBuildDirectory}\"");
-                Console.WriteLine($"Previous Assembly DLL Path \"{_options.PreviousBuildDirectory}\"");
-                Console.WriteLine("----------------------------------------------------------------------------------------------------");
-            }
-
             ChangeLevel changeLevel = ChangeLevel.None;
 
             if (AreAssembliesEqual())
@@ -42,7 +32,7 @@ namespace ASV.Core.Versioning
             }
             else
             {
-                changeLevel = _assemblyChangeDetector.DetectChanges(_assemblyLoader.NewAssembly, _assemblyLoader.PreviousAssembly);
+                changeLevel = _assemblyChangeDetector.DetectChanges(current, previous);
 
                 if (_options.Verbose)
                 {
@@ -50,7 +40,7 @@ namespace ASV.Core.Versioning
                 }
             }
 
-            Version? previousVersion = _assemblyLoader.PreviousAssembly.GetName().Version;
+            Version? previousVersion = previous.GetName().Version;
 
             if (previousVersion == null)
             {
@@ -70,14 +60,10 @@ namespace ASV.Core.Versioning
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
-
-        public Version? GetCurrentVersion()
+        
+        private bool AreAssembliesEqual(Assembly current, Assembly previous)
         {
-            return _assemblyLoader.PreviousAssembly.GetName().Version;
-        }
-
-        private bool AreAssembliesEqual()
-        {
+           
             FileInfo first = new FileInfo(Path.Join(_options.NewBuildDirectory, _options.DllFileName));
             FileInfo second = new FileInfo(Path.Join(_options.PreviousBuildDirectory, _options.DllFileName));
 

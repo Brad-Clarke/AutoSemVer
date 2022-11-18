@@ -1,9 +1,9 @@
-﻿namespace ASV.Core.Versioning
+﻿using System.Reflection;
+
+namespace ASV.Core.Versioning
 {
     public interface IAssemblyVersioner
     {
-        public Version GetNewVersion();
-
-        public Version? GetCurrentVersion();
+        public Version GetNewVersion(Assembly current, Assembly previous);
     }
 }

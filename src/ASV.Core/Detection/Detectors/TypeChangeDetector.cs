@@ -33,17 +33,17 @@ namespace ASV.Core.Detection.Detectors
             _methodChangeDetector = changeDetectorFactory.Build<MethodInfo>();
         }
 
-        public ChangeLevel DetectChanges(Type current, Type original)
+        public ChangeLevel DetectChanges(Type current, Type previous)
         {
             ChangeLevel changeLevel = ChangeLevel.None;
 
-            changeLevel = changeLevel.TryChange(CompareMethods(current, original));
-            changeLevel = changeLevel.TryChange(CompareConstructors(current, original));
-            changeLevel = changeLevel.TryChange(CompareProperties(current, original));
-            changeLevel = changeLevel.TryChange(CompareFields(current, original));
-            changeLevel = changeLevel.TryChange(CompareEvents(current, original));
-            changeLevel = changeLevel.TryChange(CompareAttributes(current, original));
-            changeLevel = changeLevel.TryChange(CompareNestedTypes(current, original));
+            changeLevel = changeLevel.TryChange(CompareMethods(current, previous));
+            changeLevel = changeLevel.TryChange(CompareConstructors(current, previous));
+            changeLevel = changeLevel.TryChange(CompareProperties(current, previous));
+            changeLevel = changeLevel.TryChange(CompareFields(current, previous));
+            changeLevel = changeLevel.TryChange(CompareEvents(current, previous));
+            changeLevel = changeLevel.TryChange(CompareAttributes(current, previous));
+            changeLevel = changeLevel.TryChange(CompareNestedTypes(current, previous));
 
             return changeLevel;
         }

@@ -5,7 +5,7 @@ namespace ASV.Core.Detection.Detectors
 {
     internal sealed class EventChangeDetector : IChangeDetector<EventInfo>
     {
-        public ChangeLevel DetectChanges(EventInfo current, EventInfo original)
+        public ChangeLevel DetectChanges(EventInfo current, EventInfo previous)
         {
             return ChangeLevel.None;
         }

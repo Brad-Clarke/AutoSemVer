@@ -20,12 +20,12 @@ namespace ASV.Core.Detection.Detectors
             _parameterChangeDetector = changeDetectorFactory.Build<ParameterInfo>();
         }
 
-        public ChangeLevel DetectChanges(ConstructorInfo current, ConstructorInfo original)
+        public ChangeLevel DetectChanges(ConstructorInfo current, ConstructorInfo previous)
         {
             ChangeLevel changeLevel = ChangeLevel.None;
 
-            changeLevel = changeLevel.TryChange(CompareAttributes(current, original));
-            changeLevel = changeLevel.TryChange(CompareParameters(current, original));
+            changeLevel = changeLevel.TryChange(CompareAttributes(current, previous));
+            changeLevel = changeLevel.TryChange(CompareParameters(current, previous));
 
             return changeLevel;
         }
