@@ -12,7 +12,7 @@ namespace ASV.Core.Extensions
             {
                 return $"{method.Name}()";
             }
-            
+
             string parametersString = string.Join(", ", parameters.Select(p => $"{p.ParameterType.GetFriendlyName()} {p.Name}"));
 
             return $"{method.Name}({parametersString})";

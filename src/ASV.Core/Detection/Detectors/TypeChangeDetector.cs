@@ -1,10 +1,10 @@
 ﻿using ASV.Core.Detection.Factory;
 using ASV.Core.Enums;
 using ASV.Core.Extensions;
+using ASV.Core.Helpers;
 using ASV.Core.Tracking;
 using DeltaWare.SDK.Core.Helpers;
 using System.Reflection;
-using ASV.Core.Helpers;
 
 namespace ASV.Core.Detection.Detectors
 {
@@ -55,7 +55,7 @@ namespace ASV.Core.Detection.Detectors
         private ChangeLevel CompareMethods(Type current, Type original)
         {
             ChangeLevel changeLevel = ChangeLevel.None;
-            
+
             CollectionHelper.Compare(current.GetMethods().Where(m => !m.IsSpecialName).ToArray(), original.GetMethods().Where(m => !m.IsSpecialName).ToArray())
                 .OnCompare((left, right) => _methodChangeDetector.Match(left, right))
                 .ForEachRemoved(removed =>

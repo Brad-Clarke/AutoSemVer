@@ -3,7 +3,6 @@ using ASV.Core.Detection.Factory;
 using ASV.Core.Enums;
 using ASV.Core.Options;
 using System.Reflection;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace ASV.Core.Versioning
 {

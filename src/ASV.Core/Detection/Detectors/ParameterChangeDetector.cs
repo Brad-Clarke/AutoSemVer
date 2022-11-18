@@ -1,9 +1,9 @@
 ﻿using ASV.Core.Enums;
 using ASV.Core.Extensions;
+using ASV.Core.Helpers;
 using ASV.Core.Tracking;
 using DeltaWare.SDK.Core.Helpers;
 using System.Reflection;
-using ASV.Core.Helpers;
 
 namespace ASV.Core.Detection.Detectors
 {

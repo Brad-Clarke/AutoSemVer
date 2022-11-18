@@ -1,14 +1,12 @@
-﻿using System.IO.Compression;
-using System.Reflection;
-using System.Runtime.Loader;
-using NuGet.Common;
-using NuGet.Configuration;
+﻿using NuGet.Common;
 using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
-using static System.Net.WebRequestMethods;
+using System.IO.Compression;
+using System.Reflection;
+using System.Runtime.Loader;
 
 namespace ASV.Core.Extensions.Nuget
 {

@@ -6,14 +6,16 @@ namespace ASV.Core.Helpers
     {
         public static bool Compare(Type left, Type right)
         {
-            string leftName = left.Name;
-            string rightName = right.Name;
-
             if (left.Name != right.Name)
             {
                 return false;
             }
-            
+
+            if (left.Namespace != right.Namespace)
+            {
+                return false;
+            }
+
             if (left.Attributes != right.Attributes)
             {
                 return false;
