@@ -9,7 +9,7 @@ namespace ASV.Core.Extensions
         {
             if (!type.IsGenericType)
             {
-                return type.Name;
+                return type.Name.TrimEnd('&');
             }
 
             string name = type.Name.Split('`').First();

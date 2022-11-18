@@ -1,5 +1,6 @@
 ﻿using ASV.Core;
 using ASV.Core.Detection;
+using ASV.Core.Extensions.Nuget;
 using ASV.Core.Options;
 using ASV.Core.Tracking;
 using ASV.Core.Versioning;
@@ -21,11 +22,11 @@ namespace ASV.Executable
             {
                 return;
             }
-            
+
             Arguments arguments = parserResult.Value;
-            
-            Assembly currentAssembly = LoadAssembly(arguments, AssemblyType.Current);
-            Assembly previousAssembly = LoadAssembly(arguments, AssemblyType.Previous);
+
+            Assembly currentAssembly = new FileSystemAssemblyLoader(arguments.CurrentBuildDirectory, arguments.PackageName).LoadAssembly();
+            Assembly previousAssembly = LoadAssembly(arguments);
 
             using ServiceProvider serviceProvider = BuildServices(arguments).BuildServiceProvider();
 
@@ -33,7 +34,7 @@ namespace ASV.Executable
             Console.WriteLine($"Checking for semantic changes in {currentAssembly.GetName().Name}\r\n");
             Console.WriteLine("----------------------------------------------------------------------------------------------------");
 
-            Version? previousVersion = null;
+            Version? previousVersion = previousAssembly.GetName().Version;
             Version version = serviceProvider.GetRequiredService<IAssemblyVersioner>().GetNewVersion(currentAssembly, previousAssembly);
 
             Console.WriteLine($"Previous Version:[{previousVersion}]");
@@ -53,28 +54,23 @@ namespace ASV.Executable
 
             services.AddScoped<IChangeTracker, FileSystemChangeTracker>();
 
-
             return services;
         }
 
-        private static Assembly LoadAssembly(Arguments arguments, AssemblyType type)
+        private static Assembly LoadAssembly(Arguments arguments)
         {
-            string directory = type switch
-            {
-                AssemblyType.Current => arguments.CurrentBuildDirectory,
-                AssemblyType.Previous => arguments.PreviousBuildDirectory,
-                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-            };
+            IAssemblyLoader assemblyLoader;
 
-            IAssemblyLoader assemblyLoader = new FileSystemAssemblyLoader(directory, arguments.PackageName);
+            if (string.IsNullOrWhiteSpace(arguments.PreviousBuildDirectory))
+            {
+                assemblyLoader = new NugetAssemblyLoader(arguments.PackageName, arguments.NuGetVersion, arguments.NuGetRepository);
+            }
+            else
+            {
+                assemblyLoader = new FileSystemAssemblyLoader(arguments.PreviousBuildDirectory, arguments.PackageName);
+            }
 
             return assemblyLoader.LoadAssembly();
-        }
-
-        private enum AssemblyType
-        {
-            Current,
-            Previous
         }
     }
 }

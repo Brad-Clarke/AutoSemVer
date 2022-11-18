@@ -2,7 +2,7 @@
   "profiles": {
     "AutoVersioning": {
       "commandName": "Project",
-      "commandLineArgs": "-p \"D:\\#data\\AutoSemVer\\Finance\\Old\"\r\n-n \"D:\\#data\\AutoSemVer\\Finance\\New\"\r\n-f \"Finance.Domain.dll\"\r\n-o \"D:\\#data\\AutoSemVer\\changes.txt\"\r\n-v"
+      "commandLineArgs": "-c \"F:\\#testing\\AutoSemVer\"\r\n-f \"DeltaWare.SDK.Core\"\r\n-o \"F:\\#testing\\AutoSemVer\\changes.txt\"\r\n-v \"5.0.1.2\"\r\n-l"
     }
   }
 }

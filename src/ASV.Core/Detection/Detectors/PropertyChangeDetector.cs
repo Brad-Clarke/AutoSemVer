@@ -1,5 +1,6 @@
 ﻿using ASV.Core.Enums;
 using ASV.Core.Extensions;
+using ASV.Core.Helpers;
 using ASV.Core.Tracking;
 using DeltaWare.SDK.Core.Helpers;
 using System.Reflection;
@@ -21,7 +22,7 @@ namespace ASV.Core.Detection.Detectors
 
             if (current.PropertyType.GetFriendlyName() != previous.PropertyType.GetFriendlyName())
             {
-                _changeTracker.Track($"Property [{current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{previous.Name}] Type has been changed from [{previous.PropertyType.GetFriendlyName()}] to [{current.PropertyType.GetFriendlyName()}].", ChangeType.Change);
+                _changeTracker.Track($"Property {current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{previous.Name} Type has been changed from {previous.PropertyType.GetFriendlyName()} to {current.PropertyType.GetFriendlyName()}.", ChangeType.Change);
 
                 changeLevel = changeLevel.TryChange(previous.IsPublic() ? ChangeLevel.Major : ChangeLevel.Patch);
             }
@@ -30,11 +31,11 @@ namespace ASV.Core.Detection.Detectors
             {
                 if (previous.IsPublic())
                 {
-                    _changeTracker.Track($"Property [{current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{previous.Name}] is no longer publicly visible.", ChangeType.Removal);
+                    _changeTracker.Track($"Property {current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{previous.Name} is no longer publicly visible.", ChangeType.Removal);
                 }
                 else
                 {
-                    _changeTracker.Track($"Property [{current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{previous.Name}] is now publicly visible.", ChangeType.Addition);
+                    _changeTracker.Track($"Property {current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{previous.Name} is now publicly visible.", ChangeType.Addition);
                 }
 
                 changeLevel = changeLevel.TryChange(previous.IsPublic() ? ChangeLevel.Major : ChangeLevel.Patch);
@@ -46,9 +47,7 @@ namespace ASV.Core.Detection.Detectors
         }
 
         public bool Match(PropertyInfo left, PropertyInfo right)
-        {
-            return left.Name == right.Name;
-        }
+            => DeepReflectionComparer.Compare(left, right);
 
         private ChangeLevel CompareAttributes(PropertyInfo current, PropertyInfo original)
         {
@@ -58,13 +57,13 @@ namespace ASV.Core.Detection.Detectors
                 .OnCompare((left, right) => left.GetType().GetFriendlyName() == right.GetType().GetFriendlyName())
                 .ForEachRemoved(removed =>
                 {
-                    _changeTracker.Track($"Property [{current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{original.Name}] had the Attribute [{removed.GetType().GetFriendlyName()}] Removed.", ChangeType.Removal);
+                    _changeTracker.Track($"Property {current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{original.Name} had the Attribute {removed.GetType().GetFriendlyName()} Removed.", ChangeType.Removal);
 
                     changeLevel = changeLevel.TryChange(original.IsPublic() ? ChangeLevel.Major : ChangeLevel.Patch);
                 })
                 .ForEachAdded(added =>
                 {
-                    _changeTracker.Track($"Property [{current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{original.Name}] had the Attribute [{added.GetType().GetFriendlyName()}] Added.", ChangeType.Addition);
+                    _changeTracker.Track($"Property {current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{original.Name} had the Attribute {added.GetType().GetFriendlyName()} Added.", ChangeType.Addition);
 
                     changeLevel = changeLevel.TryChange(original.IsPublic() ? ChangeLevel.Minor : ChangeLevel.Patch);
                 });

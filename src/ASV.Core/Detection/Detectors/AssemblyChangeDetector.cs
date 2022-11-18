@@ -27,7 +27,7 @@ namespace ASV.Core.Detection.Detectors
                 .OnCompare((left, right) => _typeChangeDetector.Match(left, right))
                 .ForEachRemoved(removed =>
                 {
-                    _changeTracker.Track($"{GetTypeName(removed)} [{removed.GetFriendlyName()}] was Removed from the Assembly.", ChangeType.Removal);
+                    _changeTracker.Track($"{GetTypeName(removed)} {removed.GetFriendlyName()} was Removed from the Assembly.", ChangeType.Removal);
 
                     changeLevel = changeLevel.TryChange(removed.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
                 })
@@ -39,7 +39,7 @@ namespace ASV.Core.Detection.Detectors
                 })
                 .ForEachAdded(added =>
                 {
-                    _changeTracker.Track($"{GetTypeName(added)} [{added.GetFriendlyName()}] was Added to the Assembly.", ChangeType.Addition);
+                    _changeTracker.Track($"{GetTypeName(added)} {added.GetFriendlyName()} was Added to the Assembly.", ChangeType.Addition);
 
                     DisplayNewTypeDetails(added);
 
@@ -68,24 +68,24 @@ namespace ASV.Core.Detection.Detectors
         {
             foreach (FieldInfo field in type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(t => !t.IsSpecialName))
             {
-                _changeTracker.Track($"Field [{type.GetFriendlyName()}.{field.Name}] was Added.", ChangeType.Addition);
+                _changeTracker.Track($"Field {type.GetFriendlyName()}.{field.Name} was Added.", ChangeType.Addition);
             }
 
             foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(t => !t.IsSpecialName))
             {
-                _changeTracker.Track($"Property [{type.GetFriendlyName()}.{property.Name}] was Added.", ChangeType.Addition);
+                _changeTracker.Track($"Property {type.GetFriendlyName()}.{property.Name} was Added.", ChangeType.Addition);
             }
 
             foreach (ConstructorInfo constructor in type.GetConstructors(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(t => !t.IsSpecialName))
             {
-                _changeTracker.Track($"Field [{type.GetFriendlyName()}].{constructor.GetFriendlyName()} was Added.", ChangeType.Addition);
+                _changeTracker.Track($"Field {type.GetFriendlyName()}.{constructor.GetFriendlyName()} was Added.", ChangeType.Addition);
             }
 
             foreach (MethodInfo method in type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(t => !t.IsSpecialName))
             {
                 string name = method.Name;
 
-                _changeTracker.Track($"Method [{type.GetFriendlyName()}].{method.GetFriendlyName()} was Added.", ChangeType.Addition);
+                _changeTracker.Track($"Method {type.GetFriendlyName()}.{method.GetFriendlyName()} was Added.", ChangeType.Addition);
             }
         }
     }

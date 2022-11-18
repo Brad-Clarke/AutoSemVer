@@ -21,23 +21,11 @@ namespace ASV.Core.Versioning
 
         public Version GetNewVersion(Assembly current, Assembly previous)
         {
-            ChangeLevel changeLevel = ChangeLevel.None;
+            ChangeLevel changeLevel = _assemblyChangeDetector.DetectChanges(current, previous);
 
-            if (AreAssembliesEqual())
+            if (_options.Verbose)
             {
-                if (_options.Verbose)
-                {
-                    Console.WriteLine("No changes detected - assemblies files match byte for byte.\r\n");
-                }
-            }
-            else
-            {
-                changeLevel = _assemblyChangeDetector.DetectChanges(current, previous);
-
-                if (_options.Verbose)
-                {
-                    Console.WriteLine($"\r\nOutcome: {changeLevel.ToString().ToUpper()}\r\n");
-                }
+                Console.WriteLine($"\r\nOutcome: {changeLevel.ToString().ToUpper()}\r\n");
             }
 
             Version? previousVersion = previous.GetName().Version;
@@ -59,37 +47,6 @@ namespace ASV.Core.Versioning
                     => new Version(previousVersion.Major, previousVersion.Minor + 1, 0, 1),
                 _ => throw new ArgumentOutOfRangeException()
             };
-        }
-        
-        private bool AreAssembliesEqual(Assembly current, Assembly previous)
-        {
-           
-            FileInfo first = new FileInfo(Path.Join(_options.NewBuildDirectory, _options.DllFileName));
-            FileInfo second = new FileInfo(Path.Join(_options.PreviousBuildDirectory, _options.DllFileName));
-
-            if (first.Length != second.Length)
-            {
-                return false;
-            }
-
-            if (string.Equals(first.FullName, second.FullName, StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-
-
-            using FileStream fs1 = first.OpenRead();
-            using FileStream fs2 = second.OpenRead();
-
-            for (int i = 0; i < first.Length; i++)
-            {
-                if (fs1.ReadByte() != fs2.ReadByte())
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
     }
 }

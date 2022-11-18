@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ASV.Core.Extensions.Nuget\ASV.Core.Extensions.Nuget.csproj" />
     <ProjectReference Include="..\ASV.Core\ASV.Core.csproj" />
   </ItemGroup>
 

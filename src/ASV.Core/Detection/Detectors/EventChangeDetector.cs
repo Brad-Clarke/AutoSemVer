@@ -1,4 +1,5 @@
 ﻿using ASV.Core.Enums;
+using ASV.Core.Helpers;
 using System.Reflection;
 
 namespace ASV.Core.Detection.Detectors
@@ -11,8 +12,6 @@ namespace ASV.Core.Detection.Detectors
         }
 
         public bool Match(EventInfo left, EventInfo right)
-        {
-            return left.Name == right.Name;
-        }
+            => DeepReflectionComparer.Compare(left, right);
     }
 }

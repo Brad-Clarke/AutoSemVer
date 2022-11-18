@@ -10,12 +10,12 @@ namespace ASV.Core.Extensions
 
             if (parameters.Length == 0)
             {
-                return $"[{method.Name}]";
+                return $"{method.Name}()";
             }
+            
+            string parametersString = string.Join(", ", parameters.Select(p => $"{p.ParameterType.GetFriendlyName()} {p.Name}"));
 
-            string parametersString = string.Join(", ", method.GetParameters().Select(p => p.GetType().Name));
-
-            return $"[{method.Name}]({parametersString})";
+            return $"{method.Name}({parametersString})";
         }
     }
 }

@@ -2,11 +2,13 @@
 using System.Reflection;
 using System.Runtime.Loader;
 using NuGet.Common;
+using NuGet.Configuration;
 using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
+using static System.Net.WebRequestMethods;
 
 namespace ASV.Core.Extensions.Nuget
 {
@@ -18,11 +20,30 @@ namespace ASV.Core.Extensions.Nuget
 
         private readonly Dictionary<string, Assembly> _loadedAssemblies = new();
 
-        public NugetAssemblyLoader(string packageId, string? version = null, string source = "https://api.nuget.org/v3/index.json")
+        public NugetAssemblyLoader(string packageId, string? version, string? source)
         {
             _packageId = packageId;
-            _version = version;
-            _source = source;
+
+            if (!string.IsNullOrWhiteSpace(version))
+            {
+                _version = version;
+            }
+
+            if (!string.IsNullOrWhiteSpace(source))
+            {
+                _source = source;
+            }
+            else
+            {
+                _source = "https://api.nuget.org/v3/index.json";
+            }
+        }
+
+        public Assembly LoadAssembly()
+        {
+            Assembly assembly = LoadAssemblyFromNugetAsync().GetAwaiter().GetResult();
+
+            return assembly;
         }
 
         private Assembly? CurrentDomainOnAssemblyResolve(object? sender, ResolveEventArgs args)
@@ -32,7 +53,7 @@ namespace ASV.Core.Extensions.Nuget
             return assembly;
         }
 
-        private async Task<Assembly> LoadFromNugetAsync()
+        private async Task<Assembly> LoadAssemblyFromNugetAsync()
         {
             SourceRepository repository = Repository.Factory.GetCoreV3(_source);
 
@@ -104,7 +125,6 @@ namespace ASV.Core.Extensions.Nuget
 
             return parsedPackagerVersion;
         }
-
     }
 
     public static class NugetExtensions
