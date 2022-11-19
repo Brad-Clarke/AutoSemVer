@@ -2,7 +2,7 @@
   "profiles": {
     "AutoVersioning": {
       "commandName": "Project",
-      "commandLineArgs": "-c \"F:\\#testing\\AutoSemVer\"\r\n-f \"DeltaWare.SDK.Core\"\r\n-o \"F:\\#testing\\AutoSemVer\\changes.txt\"\r\n-v \"5.0.1.2\"\r\n-l"
+      "commandLineArgs": "-c \"F:\\#testing\\AutoSemVer\"\r\n-f \"DeltaWare.SDK.Core\"\r\n-o \"F:\\#testing\\AutoSemVer\\changes.txt\"\r\n-v \"5.0.0.1\"\r\n-l"
     }
   }
 }

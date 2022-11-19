@@ -4,9 +4,9 @@ namespace ASV.Core.Extensions
 {
     internal static class MethodInfoExtensions
     {
-        public static string GetFriendlyName(this MethodInfo method)
+        public static string ToFriendlyName(this MethodInfo method)
         {
-            return $"{method.ReturnType.GetFriendlyName()} {method.DeclaringType.GetFriendlyName()}.{method.Name}{GetGenericArgumentString(method)}({GetParameterString(method)})";
+            return $"{method.ReturnType.ToFriendlyName()} {method.DeclaringType?.ToFriendlyName() ?? "N/A"}.{method.Name}{GetGenericArgumentString(method)}({GetParameterString(method)})";
         }
 
         private static string GetParameterString(MethodInfo method)
@@ -18,7 +18,7 @@ namespace ASV.Core.Extensions
                 return string.Empty;
             }
 
-            return string.Join(", ", parameters.Select(p => $"{p.ParameterType.GetFriendlyName()} {p.Name}"));
+            return string.Join(", ", parameters.Select(p => p.ToFriendlyName()));
         }
 
         private static string GetGenericArgumentString(MethodInfo method)
@@ -30,7 +30,7 @@ namespace ASV.Core.Extensions
                 return string.Empty;
             }
 
-            string arguments = string.Join(", ", method.GetGenericArguments().Select(a => a.GetFriendlyName()));
+            string arguments = string.Join(", ", method.GetGenericArguments().Select(a => a.ToFriendlyName()));
 
             return $"<{arguments}>";
         }

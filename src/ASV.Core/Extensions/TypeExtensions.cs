@@ -5,7 +5,12 @@ namespace ASV.Core.Extensions
 {
     public static class TypeExtensions
     {
-        public static string GetFriendlyName(this Type type)
+        public static MethodInfo[] GetValidMethods(this Type type)
+        {
+            return type.GetMethods().Where(t => !t.IsSpecialName).ToArray();
+        }
+
+        public static string ToFriendlyName(this Type type)
         {
             if (!type.IsGenericType)
             {
@@ -14,7 +19,7 @@ namespace ASV.Core.Extensions
 
             string name = type.Name.Split('`').First();
 
-            string arguments = string.Join(", ", type.GetGenericArguments().Select(a => a.GetFriendlyName()));
+            string arguments = string.Join(", ", type.GetGenericArguments().Select(a => a.ToFriendlyName()));
 
             return $"{name}<{arguments}>";
         }

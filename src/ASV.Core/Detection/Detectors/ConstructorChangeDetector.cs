@@ -39,16 +39,16 @@ namespace ASV.Core.Detection.Detectors
             ChangeLevel changeLevel = ChangeLevel.None;
 
             CollectionHelper.Compare(current.GetCustomAttributes()?.ToArray() ?? Array.Empty<Attribute>(), original.GetCustomAttributes()?.ToArray() ?? Array.Empty<Attribute>())
-                .OnCompare((left, right) => left.GetType().GetFriendlyName() == right.GetType().GetFriendlyName())
+                .OnCompare((left, right) => left.GetType().ToFriendlyName() == right.GetType().ToFriendlyName())
                 .ForEachRemoved(removed =>
                 {
-                    _changeTracker.Track($"Constructor {original.GetFriendlyName()} had the Attribute {removed.GetType().GetFriendlyName()} Removed.", ChangeType.Removal);
+                    _changeTracker.Track($"Constructor {original.ToFriendlyName()} had the Attribute {removed.GetType().ToFriendlyName()} Removed.", ChangeType.Removal);
 
                     changeLevel = changeLevel.TryChange(current.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
                 })
                 .ForEachAdded(added =>
                 {
-                    _changeTracker.Track($"Field {current.GetFriendlyName()} had the Attribute {added.GetType().GetFriendlyName()} Added.", ChangeType.Addition);
+                    _changeTracker.Track($"Field {current.ToFriendlyName()} had the Attribute {added.GetType().ToFriendlyName()} Added.", ChangeType.Addition);
 
                     changeLevel = changeLevel.TryChange(current.IsPublic ? ChangeLevel.Minor : ChangeLevel.Patch);
                 });
@@ -64,7 +64,7 @@ namespace ASV.Core.Detection.Detectors
                 .OnCompare((left, right) => _parameterChangeDetector.Match(left, right))
                 .ForEachRemoved(removed =>
                 {
-                    _changeTracker.Track($"Constructor {current.GetFriendlyName()} had the Parameter Removed {removed.GetType().GetFriendlyName()}.", ChangeType.Removal);
+                    _changeTracker.Track($"Constructor {current.ToFriendlyName()} had the Parameter Removed {removed.GetType().ToFriendlyName()}.", ChangeType.Removal);
 
                     changeLevel = changeLevel.TryChange(current.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
                 })
@@ -76,7 +76,7 @@ namespace ASV.Core.Detection.Detectors
                 })
                 .ForEachAdded(added =>
                 {
-                    _changeTracker.Track($"Constructor {original.GetFriendlyName()} had the Parameter Added {added.GetType().GetFriendlyName()}.", ChangeType.Addition);
+                    _changeTracker.Track($"Constructor {original.ToFriendlyName()} had the Parameter Added {added.GetType().ToFriendlyName()}.", ChangeType.Addition);
 
                     changeLevel = changeLevel.TryChange(current.IsPublic ? ChangeLevel.Minor : ChangeLevel.Patch);
                 });

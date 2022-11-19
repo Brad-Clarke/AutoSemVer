@@ -20,9 +20,9 @@ namespace ASV.Core.Detection.Detectors
         {
             ChangeLevel changeLevel = ChangeLevel.None;
 
-            if (current.FieldType.GetFriendlyName() != previous.FieldType.GetFriendlyName())
+            if (current.FieldType.ToFriendlyName() != previous.FieldType.ToFriendlyName())
             {
-                _changeTracker.Track($"Field {current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{previous.Name} Type has been changed from {previous.FieldType.GetFriendlyName()} to {current.FieldType.GetFriendlyName()}.", ChangeType.Change);
+                _changeTracker.Track($"Field {current.DeclaringType?.ToFriendlyName() ?? "unknown"}.{previous.Name} Type has been changed from {previous.FieldType.ToFriendlyName()} to {current.FieldType.ToFriendlyName()}.", ChangeType.Change);
 
                 changeLevel = changeLevel.TryChange(previous.IsPublic() ? ChangeLevel.Major : ChangeLevel.Patch);
             }
@@ -31,11 +31,11 @@ namespace ASV.Core.Detection.Detectors
             {
                 if (previous.IsPublic())
                 {
-                    _changeTracker.Track($"Field {current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{previous.Name} is no longer publicly visible.", ChangeType.Removal);
+                    _changeTracker.Track($"Field {current.DeclaringType?.ToFriendlyName() ?? "unknown"}.{previous.Name} is no longer publicly visible.", ChangeType.Removal);
                 }
                 else
                 {
-                    _changeTracker.Track($"Field {current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{previous.Name} is now publicly visible.", ChangeType.Addition);
+                    _changeTracker.Track($"Field {current.DeclaringType?.ToFriendlyName() ?? "unknown"}.{previous.Name} is now publicly visible.", ChangeType.Addition);
                 }
 
                 changeLevel = changeLevel.TryChange(previous.IsPublic() ? ChangeLevel.Major : ChangeLevel.Patch);
@@ -54,16 +54,16 @@ namespace ASV.Core.Detection.Detectors
             ChangeLevel changeLevel = ChangeLevel.None;
 
             CollectionHelper.Compare(current.GetCustomAttributes().ToArray(), original.GetCustomAttributes().ToArray())
-                .OnCompare((left, right) => left.GetType().GetFriendlyName() == right.GetType().GetFriendlyName())
+                .OnCompare((left, right) => left.GetType().ToFriendlyName() == right.GetType().ToFriendlyName())
                 .ForEachRemoved(removed =>
                 {
-                    _changeTracker.Track($"Field {current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{original.Name} had the Attribute {removed.GetType().GetFriendlyName()} Removed.", ChangeType.Removal);
+                    _changeTracker.Track($"Field {current.DeclaringType?.ToFriendlyName() ?? "unknown"}.{original.Name} had the Attribute {removed.GetType().ToFriendlyName()} Removed.", ChangeType.Removal);
 
                     changeLevel = changeLevel.TryChange(original.IsPublic() ? ChangeLevel.Major : ChangeLevel.Patch);
                 })
                 .ForEachAdded(added =>
                 {
-                    _changeTracker.Track($"Field {current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{original.Name} had the Attribute {added.GetType().GetFriendlyName()} Added.", ChangeType.Addition);
+                    _changeTracker.Track($"Field {current.DeclaringType?.ToFriendlyName() ?? "unknown"}.{original.Name} had the Attribute {added.GetType().ToFriendlyName()} Added.", ChangeType.Addition);
 
                     changeLevel = changeLevel.TryChange(original.IsPublic() ? ChangeLevel.Minor : ChangeLevel.Patch);
                 });

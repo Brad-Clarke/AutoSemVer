@@ -56,11 +56,11 @@ namespace ASV.Core.Detection.Detectors
         {
             ChangeLevel changeLevel = ChangeLevel.None;
 
-            CollectionHelper.Compare(current.GetMethods().Where(m => !m.IsSpecialName).ToArray(), original.GetMethods().Where(m => !m.IsSpecialName).ToArray())
+            CollectionHelper.Compare(current.GetValidMethods(), original.GetValidMethods())
                 .OnCompare((left, right) => _methodChangeDetector.Match(left, right))
                 .ForEachRemoved(removed =>
                 {
-                    _changeTracker.Track($"Method {removed.GetFriendlyName()} was Removed.", ChangeType.Removal);
+                    _changeTracker.Track($"Method {removed.ToFriendlyName()} was Removed.", ChangeType.Removal);
 
                     changeLevel = changeLevel.TryChange(removed.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
                 })
@@ -72,7 +72,7 @@ namespace ASV.Core.Detection.Detectors
                 })
                 .ForEachAdded(added =>
                 {
-                    _changeTracker.Track($"Method {added.GetFriendlyName()} was Added.", ChangeType.Addition);
+                    _changeTracker.Track($"Method {added.ToFriendlyName()} was Added.", ChangeType.Addition);
 
                     changeLevel = changeLevel.TryChange(added.IsPublic ? ChangeLevel.Minor : ChangeLevel.Patch);
                 });
@@ -88,7 +88,7 @@ namespace ASV.Core.Detection.Detectors
                 .OnCompare((left, right) => _constructorChangeDetector.Match(left, right))
                 .ForEachRemoved(removed =>
                 {
-                    _changeTracker.Track($"Constructor {original.GetFriendlyName()}.{removed.GetFriendlyName()} was Removed.", ChangeType.Removal);
+                    _changeTracker.Track($"Constructor {original.ToFriendlyName()}.{removed.ToFriendlyName()} was Removed.", ChangeType.Removal);
 
                     changeLevel = changeLevel.TryChange(removed.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
                 })
@@ -100,7 +100,7 @@ namespace ASV.Core.Detection.Detectors
                 })
                 .ForEachAdded(added =>
                 {
-                    _changeTracker.Track($"Constructor {original.GetFriendlyName()}.{added.GetFriendlyName()} was Added.", ChangeType.Addition);
+                    _changeTracker.Track($"Constructor {original.ToFriendlyName()}.{added.ToFriendlyName()} was Added.", ChangeType.Addition);
 
                     changeLevel = changeLevel.TryChange(added.IsPublic ? ChangeLevel.Minor : ChangeLevel.Patch);
                 });
@@ -116,7 +116,7 @@ namespace ASV.Core.Detection.Detectors
                 .OnCompare((left, right) => _propertyChangeDetector.Match(left, right))
                 .ForEachRemoved(removed =>
                 {
-                    _changeTracker.Track($"Property {original.GetFriendlyName()}.{removed.Name} was Removed.", ChangeType.Removal);
+                    _changeTracker.Track($"Property {original.ToFriendlyName()}.{removed.Name} was Removed.", ChangeType.Removal);
 
                     changeLevel = changeLevel.TryChange(removed.IsPublic() ? ChangeLevel.Major : ChangeLevel.Patch);
                 })
@@ -128,7 +128,7 @@ namespace ASV.Core.Detection.Detectors
                 })
                 .ForEachAdded(added =>
                 {
-                    _changeTracker.Track($"Property {original.GetFriendlyName()}.{added.Name} was Added.", ChangeType.Addition);
+                    _changeTracker.Track($"Property {original.ToFriendlyName()}.{added.Name} was Added.", ChangeType.Addition);
 
                     changeLevel = changeLevel.TryChange(added.IsPublic() ? ChangeLevel.Minor : ChangeLevel.Patch);
                 });
@@ -144,7 +144,7 @@ namespace ASV.Core.Detection.Detectors
                 .OnCompare((left, right) => _fieldChangeDetector.Match(left, right))
                 .ForEachRemoved(removed =>
                 {
-                    _changeTracker.Track($"Field {original.GetFriendlyName()}.{removed.Name} was Removed.", ChangeType.Removal);
+                    _changeTracker.Track($"Field {original.ToFriendlyName()}.{removed.Name} was Removed.", ChangeType.Removal);
 
                     changeLevel = changeLevel.TryChange(removed.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
                 })
@@ -156,7 +156,7 @@ namespace ASV.Core.Detection.Detectors
                 })
                 .ForEachAdded(added =>
                 {
-                    _changeTracker.Track($"Field {original.GetFriendlyName()}.{added.Name} was Added.", ChangeType.Addition);
+                    _changeTracker.Track($"Field {original.ToFriendlyName()}.{added.Name} was Added.", ChangeType.Addition);
 
                     changeLevel = changeLevel.TryChange(added.IsPublic ? ChangeLevel.Minor : ChangeLevel.Patch);
                 });
@@ -172,7 +172,7 @@ namespace ASV.Core.Detection.Detectors
                 .OnCompare((left, right) => _eventChangeDetector.Match(left, right))
                 .ForEachRemoved(removed =>
                 {
-                    _changeTracker.Track($"Event {original.GetFriendlyName()}.{removed.Name} was Removed.", ChangeType.Removal);
+                    _changeTracker.Track($"Event {original.ToFriendlyName()}.{removed.Name} was Removed.", ChangeType.Removal);
 
                     changeLevel = changeLevel.TryChange(removed.IsPublic() ? ChangeLevel.Major : ChangeLevel.Patch);
                 })
@@ -184,7 +184,7 @@ namespace ASV.Core.Detection.Detectors
                 })
                 .ForEachAdded(added =>
                 {
-                    _changeTracker.Track($"Event {original.GetFriendlyName()}.{added.Name} was Added.", ChangeType.Addition);
+                    _changeTracker.Track($"Event {original.ToFriendlyName()}.{added.Name} was Added.", ChangeType.Addition);
 
                     changeLevel = changeLevel.TryChange(added.IsPublic() ? ChangeLevel.Minor : ChangeLevel.Patch);
                 });
@@ -197,16 +197,16 @@ namespace ASV.Core.Detection.Detectors
             ChangeLevel changeLevel = ChangeLevel.None;
 
             CollectionHelper.Compare(current.GetCustomAttributes().ToArray(), original.GetCustomAttributes().ToArray())
-                .OnCompare((left, right) => left.GetType().GetFriendlyName() == right.GetType().GetFriendlyName())
+                .OnCompare((left, right) => left.GetType().ToFriendlyName() == right.GetType().ToFriendlyName())
                 .ForEachRemoved(removed =>
                 {
-                    _changeTracker.Track($"Attribute {original.GetFriendlyName()}.{removed.GetType().GetFriendlyName()} was Removed.", ChangeType.Removal);
+                    _changeTracker.Track($"Attribute {original.ToFriendlyName()}.{removed.GetType().ToFriendlyName()} was Removed.", ChangeType.Removal);
 
                     changeLevel = changeLevel.TryChange(original.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
                 })
                 .ForEachAdded(added =>
                 {
-                    _changeTracker.Track($"Attribute {original.GetFriendlyName()}.{added.GetType().GetFriendlyName()} was Added.", ChangeType.Addition);
+                    _changeTracker.Track($"Attribute {original.ToFriendlyName()}.{added.GetType().ToFriendlyName()} was Added.", ChangeType.Addition);
 
                     changeLevel = changeLevel.TryChange(original.IsPublic ? ChangeLevel.Minor : ChangeLevel.Patch);
                 });

@@ -4,7 +4,7 @@ namespace ASV.Core.Extensions
 {
     internal static class ConstructorInfoExtensions
     {
-        public static string GetFriendlyName(this ConstructorInfo constructor)
+        public static string ToFriendlyName(this ConstructorInfo constructor)
         {
             ParameterInfo[] parameters = constructor.GetParameters();
 
@@ -13,7 +13,7 @@ namespace ASV.Core.Extensions
                 return $"{constructor.Name}";
             }
 
-            string parametersString = string.Join(", ", constructor.GetParameters().Select(p => $"{p.GetType().GetFriendlyName()} {p.Name}"));
+            string parametersString = string.Join(", ", constructor.GetParameters().Select(p => p.ToFriendlyName()));
 
             return $"{constructor.Name}({parametersString})";
         }

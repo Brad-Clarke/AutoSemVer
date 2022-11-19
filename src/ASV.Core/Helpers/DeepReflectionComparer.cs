@@ -123,7 +123,7 @@ namespace ASV.Core.Helpers
                 return false;
             }
 
-            return Compare(left.ParameterType, right.ParameterType);
+            return true;
         }
 
         public static bool Compare(PropertyInfo left, PropertyInfo right)
@@ -138,7 +138,7 @@ namespace ASV.Core.Helpers
                 return false;
             }
 
-            return Compare(left.PropertyType, right.PropertyType);
+            return true;
         }
 
         public static bool Compare(FieldInfo left, FieldInfo right)
@@ -153,7 +153,7 @@ namespace ASV.Core.Helpers
                 return false;
             }
 
-            return Compare(left.FieldType, right.FieldType);
+            return true;
         }
 
         public static bool Compare(EventInfo left, EventInfo right)
