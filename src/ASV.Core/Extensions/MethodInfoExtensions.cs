@@ -6,16 +6,33 @@ namespace ASV.Core.Extensions
     {
         public static string GetFriendlyName(this MethodInfo method)
         {
-            ParameterInfo[] parameters = method.GetParameters();
+            return $"{method.ReturnType.GetFriendlyName()} {method.DeclaringType.GetFriendlyName()}.{method.Name}{GetGenericArgumentString(method)}({GetParameterString(method)})";
+        }
 
+        private static string GetParameterString(MethodInfo method)
+        {
+            ParameterInfo[] parameters = method.GetParameters();
+            
             if (parameters.Length == 0)
             {
-                return $"{method.Name}()";
+                return string.Empty;
             }
 
-            string parametersString = string.Join(", ", parameters.Select(p => $"{p.ParameterType.GetFriendlyName()} {p.Name}"));
+            return string.Join(", ", parameters.Select(p => $"{p.ParameterType.GetFriendlyName()} {p.Name}"));
+        }
 
-            return $"{method.Name}({parametersString})";
+        private static string GetGenericArgumentString(MethodInfo method)
+        {
+            Type[] genericArguments = method.GetGenericArguments();
+
+            if (genericArguments.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            string arguments = string.Join(", ", method.GetGenericArguments().Select(a => a.GetFriendlyName()));
+
+            return $"<{arguments}>";
         }
     }
 }

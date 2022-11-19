@@ -60,7 +60,7 @@ namespace ASV.Core.Detection.Detectors
                 .OnCompare((left, right) => _methodChangeDetector.Match(left, right))
                 .ForEachRemoved(removed =>
                 {
-                    _changeTracker.Track($"Method {original.GetFriendlyName()}.{removed.GetFriendlyName()} was Removed.", ChangeType.Removal);
+                    _changeTracker.Track($"Method {removed.GetFriendlyName()} was Removed.", ChangeType.Removal);
 
                     changeLevel = changeLevel.TryChange(removed.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
                 })
@@ -72,7 +72,7 @@ namespace ASV.Core.Detection.Detectors
                 })
                 .ForEachAdded(added =>
                 {
-                    _changeTracker.Track($"Method {original.GetFriendlyName()}.{added.GetFriendlyName()} was Added.", ChangeType.Addition);
+                    _changeTracker.Track($"Method {added.GetFriendlyName()} was Added.", ChangeType.Addition);
 
                     changeLevel = changeLevel.TryChange(added.IsPublic ? ChangeLevel.Minor : ChangeLevel.Patch);
                 });

@@ -27,7 +27,7 @@ namespace ASV.Core.Detection.Detectors
 
             if (current.ReturnType.GetFriendlyName() != previous.ReturnType.GetFriendlyName())
             {
-                _changeTracker.Track($"Method {current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{previous.Name} Type has been changed from {previous.ReturnType.GetFriendlyName()} to {current.ReturnType.GetFriendlyName()}.", ChangeType.Change);
+                _changeTracker.Track($"Method {previous.GetFriendlyName()} Type has been changed from {previous.ReturnType.GetFriendlyName()} to {current.ReturnType.GetFriendlyName()}.", ChangeType.Change);
 
                 changeLevel = changeLevel.TryChange(previous.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
             }
@@ -36,11 +36,11 @@ namespace ASV.Core.Detection.Detectors
             {
                 if (previous.IsPublic)
                 {
-                    _changeTracker.Track($"Method {current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{previous.Name} is no longer publicly visible.", ChangeType.Removal);
+                    _changeTracker.Track($"Method {previous.GetFriendlyName()} is no longer publicly visible.", ChangeType.Removal);
                 }
                 else
                 {
-                    _changeTracker.Track($"Method {current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{previous.Name} is now publicly visible.", ChangeType.Addition);
+                    _changeTracker.Track($"Method {previous.GetFriendlyName()} is now publicly visible.", ChangeType.Addition);
                 }
 
                 changeLevel = changeLevel.TryChange(previous.IsPublic ? ChangeLevel.Major : ChangeLevel.Patch);
@@ -63,13 +63,13 @@ namespace ASV.Core.Detection.Detectors
                 .OnCompare((left, right) => left.GetType().GetFriendlyName() == right.GetType().GetFriendlyName())
                 .ForEachRemoved(removed =>
                 {
-                    _changeTracker.Track($"Method {current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{original.Name} had the Attribute {removed.GetType().GetFriendlyName()} Removed.", ChangeType.Removal);
+                    _changeTracker.Track($"Method {original.GetFriendlyName()} had the Attribute {removed.GetType().GetFriendlyName()} Removed.", ChangeType.Removal);
 
                     changeLevel = changeLevel.TryChange(original.IsPublic() ? ChangeLevel.Major : ChangeLevel.Patch);
                 })
                 .ForEachAdded(added =>
                 {
-                    _changeTracker.Track($"Method {current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{original.Name} had the Attribute {added.GetType().GetFriendlyName()} Added.", ChangeType.Addition);
+                    _changeTracker.Track($"Method {original.GetFriendlyName()} had the Attribute {added.GetType().GetFriendlyName()} Added.", ChangeType.Addition);
 
                     changeLevel = changeLevel.TryChange(original.IsPublic() ? ChangeLevel.Minor : ChangeLevel.Patch);
                 });
@@ -85,7 +85,7 @@ namespace ASV.Core.Detection.Detectors
                 .OnCompare((left, right) => _parameterChangeDetector.Match(left, right))
                 .ForEachRemoved(removed =>
                 {
-                    _changeTracker.Track($"Method {original.DeclaringType?.GetFriendlyName() ?? "unknown"}.{original.Name} had the Parameter Removed {removed.GetType().GetFriendlyName()}.", ChangeType.Removal);
+                    _changeTracker.Track($"Method {original.GetFriendlyName()} had the Parameter Removed {removed.GetType().GetFriendlyName()}.", ChangeType.Removal);
 
                     changeLevel = changeLevel.TryChange(removed.Member.IsPublic() ? ChangeLevel.Major : ChangeLevel.Patch);
                 })
@@ -97,7 +97,7 @@ namespace ASV.Core.Detection.Detectors
                 })
                 .ForEachAdded(added =>
                 {
-                    _changeTracker.Track($"Method {current.DeclaringType?.GetFriendlyName() ?? "unknown"}.{current.Name} had the Parameter Added {added.GetType().GetFriendlyName()}.", ChangeType.Addition);
+                    _changeTracker.Track($"Method {current.GetFriendlyName()} had the Parameter Added {added.GetType().GetFriendlyName()}.", ChangeType.Addition);
 
                     changeLevel = changeLevel.TryChange(added.Member.IsPublic() ? ChangeLevel.Minor : ChangeLevel.Patch);
                 });

@@ -85,7 +85,7 @@ namespace ASV.Core.Detection.Detectors
             {
                 string name = method.Name;
 
-                _changeTracker.Track($"Method {type.GetFriendlyName()}.{method.GetFriendlyName()} was Added.", ChangeType.Addition);
+                _changeTracker.Track($"Method {method.GetFriendlyName()} was Added.", ChangeType.Addition);
             }
         }
     }
