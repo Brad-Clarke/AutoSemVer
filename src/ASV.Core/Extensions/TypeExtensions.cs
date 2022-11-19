@@ -6,9 +6,34 @@ namespace ASV.Core.Extensions
     public static class TypeExtensions
     {
         public static MethodInfo[] GetValidMethods(this Type type)
-        {
-            return type.GetMethods().Where(t => !t.IsSpecialName).ToArray();
-        }
+            => type
+                .GetMethods(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance)
+                .Where(t => !t.IsSpecialName && t.DeclaringType != typeof(object))
+                .ToArray();
+
+        public static FieldInfo[] GetValidFields(this Type type)
+            => type
+                .GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance)
+                .Where(t => !t.IsSpecialName && t.DeclaringType != typeof(object))
+                .ToArray();
+
+        public static PropertyInfo[] GetValidProperties(this Type type)
+            => type
+                .GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance)
+                .Where(t => !t.IsSpecialName && t.DeclaringType != typeof(object))
+                .ToArray();
+
+        public static ConstructorInfo[] GetValidConstructors(this Type type)
+            => type
+                .GetConstructors(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance)
+                .Where(t => !t.IsSpecialName && t.DeclaringType != typeof(object))
+                .ToArray();
+
+        public static EventInfo[] GetValidEvents(this Type type)
+            => type
+                .GetEvents(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance)
+                .Where(t => !t.IsSpecialName && t.DeclaringType != typeof(object))
+                .ToArray();
 
         public static string ToFriendlyName(this Type type)
         {

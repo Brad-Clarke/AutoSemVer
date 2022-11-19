@@ -22,7 +22,7 @@ namespace ASV.Core.Detection.Detectors
 
             if (current.PropertyType.ToFriendlyName() != previous.PropertyType.ToFriendlyName())
             {
-                _changeTracker.Track($"Property {current.DeclaringType?.ToFriendlyName() ?? "unknown"}.{previous.Name} Type has been changed from {previous.PropertyType.ToFriendlyName()} to {current.PropertyType.ToFriendlyName()}.", ChangeType.Change);
+                _changeTracker.Track($"Property {previous.ToFriendlyName()} Type has been changed from {previous.PropertyType.ToFriendlyName()} to {current.PropertyType.ToFriendlyName()}.", ChangeType.Change);
 
                 changeLevel = changeLevel.TryChange(previous.IsPublic() ? ChangeLevel.Major : ChangeLevel.Patch);
             }
@@ -31,11 +31,11 @@ namespace ASV.Core.Detection.Detectors
             {
                 if (previous.IsPublic())
                 {
-                    _changeTracker.Track($"Property {current.DeclaringType?.ToFriendlyName() ?? "unknown"}.{previous.Name} is no longer publicly visible.", ChangeType.Removal);
+                    _changeTracker.Track($"Property {previous.ToFriendlyName()} is no longer publicly visible.", ChangeType.Removal);
                 }
                 else
                 {
-                    _changeTracker.Track($"Property {current.DeclaringType?.ToFriendlyName() ?? "unknown"}.{previous.Name} is now publicly visible.", ChangeType.Addition);
+                    _changeTracker.Track($"Property {current.ToFriendlyName()} is now publicly visible.", ChangeType.Addition);
                 }
 
                 changeLevel = changeLevel.TryChange(previous.IsPublic() ? ChangeLevel.Major : ChangeLevel.Patch);

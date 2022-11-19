@@ -26,6 +26,10 @@ namespace ASV.Core.Tracking
             _trackedChanges.Add(new TrackedChange(description, changeType));
         }
 
+        public void Track(ChangeType changeType, ChangeLevel level, ReflectedType type, string primarySource, string secondarySource, string description)
+        {
+        }
+
         private class TrackedChange
         {
             public string Description { get; }
@@ -41,6 +45,26 @@ namespace ASV.Core.Tracking
             public override string ToString()
             {
                 return $"- {Description}";
+            }
+        }
+
+        private class TrackedChangeV2
+        {
+            private readonly ChangeType _changeType;
+            private readonly ChangeLevel _level;
+            private readonly ReflectedType _type;
+            private readonly string _primarySource;
+            private readonly string _secondarySource;
+            private readonly string _description;
+
+            public TrackedChangeV2(ChangeType changeType, ChangeLevel level, ReflectedType type, string primarySource, string secondarySource, string description)
+            {
+                _changeType = changeType;
+                _level = level;
+                _type = type;
+                _primarySource = primarySource;
+                _secondarySource = secondarySource;
+                _description = description;
             }
         }
 

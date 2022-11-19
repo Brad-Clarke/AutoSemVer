@@ -84,7 +84,7 @@ namespace ASV.Core.Detection.Detectors
         {
             ChangeLevel changeLevel = ChangeLevel.None;
 
-            CollectionHelper.Compare(current.GetConstructors().Where(m => !m.IsSpecialName).ToArray(), original.GetConstructors().Where(m => !m.IsSpecialName).ToArray())
+            CollectionHelper.Compare(current.GetValidConstructors(), original.GetValidConstructors())
                 .OnCompare((left, right) => _constructorChangeDetector.Match(left, right))
                 .ForEachRemoved(removed =>
                 {
@@ -112,11 +112,11 @@ namespace ASV.Core.Detection.Detectors
         {
             ChangeLevel changeLevel = ChangeLevel.None;
 
-            CollectionHelper.Compare(current.GetProperties(), original.GetProperties())
+            CollectionHelper.Compare(current.GetValidProperties(), original.GetValidProperties())
                 .OnCompare((left, right) => _propertyChangeDetector.Match(left, right))
                 .ForEachRemoved(removed =>
                 {
-                    _changeTracker.Track($"Property {original.ToFriendlyName()}.{removed.Name} was Removed.", ChangeType.Removal);
+                    _changeTracker.Track($"Property {removed.ToFriendlyName()} was Removed.", ChangeType.Removal);
 
                     changeLevel = changeLevel.TryChange(removed.IsPublic() ? ChangeLevel.Major : ChangeLevel.Patch);
                 })
@@ -128,7 +128,7 @@ namespace ASV.Core.Detection.Detectors
                 })
                 .ForEachAdded(added =>
                 {
-                    _changeTracker.Track($"Property {original.ToFriendlyName()}.{added.Name} was Added.", ChangeType.Addition);
+                    _changeTracker.Track($"Property {added.ToFriendlyName()} was Added.", ChangeType.Addition);
 
                     changeLevel = changeLevel.TryChange(added.IsPublic() ? ChangeLevel.Minor : ChangeLevel.Patch);
                 });
@@ -140,7 +140,7 @@ namespace ASV.Core.Detection.Detectors
         {
             ChangeLevel changeLevel = ChangeLevel.None;
 
-            CollectionHelper.Compare(current.GetFields(), original.GetFields())
+            CollectionHelper.Compare(current.GetValidFields(), original.GetValidFields())
                 .OnCompare((left, right) => _fieldChangeDetector.Match(left, right))
                 .ForEachRemoved(removed =>
                 {
@@ -168,7 +168,7 @@ namespace ASV.Core.Detection.Detectors
         {
             ChangeLevel changeLevel = ChangeLevel.None;
 
-            CollectionHelper.Compare(current.GetEvents(), original.GetEvents())
+            CollectionHelper.Compare(current.GetValidEvents(), original.GetValidEvents())
                 .OnCompare((left, right) => _eventChangeDetector.Match(left, right))
                 .ForEachRemoved(removed =>
                 {

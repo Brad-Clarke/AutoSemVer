@@ -22,7 +22,7 @@ namespace ASV.Core.Detection.Detectors
         public ChangeLevel DetectChanges(Assembly current, Assembly previous)
         {
             ChangeLevel changeLevel = ChangeLevel.None;
-
+            
             CollectionHelper.Compare(current.GetLoadedTypes().Where(t => !t.IsSystemGenerated()).ToArray(), previous.GetLoadedTypes().Where(t => !t.IsSystemGenerated()).ToArray())
                 .OnCompare((left, right) => _typeChangeDetector.Match(left, right))
                 .ForEachRemoved(removed =>
@@ -66,25 +66,23 @@ namespace ASV.Core.Detection.Detectors
 
         private void DisplayNewTypeDetails(Type type)
         {
-            foreach (FieldInfo field in type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(t => !t.IsSpecialName))
+            foreach (FieldInfo field in type.GetValidFields())
             {
                 _changeTracker.Track($"Field {type.ToFriendlyName()}.{field.Name} was Added.", ChangeType.Addition);
             }
 
-            foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(t => !t.IsSpecialName))
+            foreach (PropertyInfo property in type.GetValidProperties())
             {
-                _changeTracker.Track($"Property {type.ToFriendlyName()}.{property.Name} was Added.", ChangeType.Addition);
+                _changeTracker.Track($"Property {property.ToFriendlyName()} was Added.", ChangeType.Addition);
             }
 
-            foreach (ConstructorInfo constructor in type.GetConstructors(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(t => !t.IsSpecialName))
+            foreach (ConstructorInfo constructor in type.GetValidConstructors())
             {
                 _changeTracker.Track($"Field {type.ToFriendlyName()}.{constructor.ToFriendlyName()} was Added.", ChangeType.Addition);
             }
 
             foreach (MethodInfo method in type.GetValidMethods())
             {
-                string name = method.Name;
-
                 _changeTracker.Track($"Method {method.ToFriendlyName()} was Added.", ChangeType.Addition);
             }
         }
